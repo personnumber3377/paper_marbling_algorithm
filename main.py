@@ -2,6 +2,7 @@
 import turtle
 from inkdrop import *
 import time
+import random
 
 
 CIRC_RADIUS = 0.5 # Radius of each circle when added.
@@ -125,8 +126,9 @@ def main_loop() -> None:
 		else:
 			# Handle new circle.
 			#print("new_circle == True")
-
-			new_circ = InkDrop(CIRC_RADIUS, new_x, new_y)
+			MAX_RANGE = 0.5
+			radius = random.random() * MAX_RANGE
+			new_circ = InkDrop(radius, new_x, new_y)
 			# Marble every other drop, before adding the new drop to the list.
 			for drop in drops:
 				drop.marble(new_circ)

@@ -1,8 +1,9 @@
 
 CIRCLE_RESOLUTION = 200 # How many "circumference points" there are for each circle.
 SCALE_FACTOR = 100 # Scale the coordinates by this much when drawing..
-import math
 
+import math
+import random
 
 '''
 
@@ -31,6 +32,11 @@ def calc_d(P, A, N) -> float:
 	d = abs(dot_p)
 	return d
 
+HEX = "0123456789ABCDEF"
+
+def rand_color() -> str: # Returns a random color "#aabbcc"
+	return "#"+str("".join([random.choice(HEX) for _ in range(6)])) # Generate random hex color string
+
 class InkDrop:
 
 	def __init__(self, r, x0, y0) -> None: # Constructor...
@@ -38,6 +44,7 @@ class InkDrop:
 		self.x0 = x0
 		self.y0 = y0
 		self.vertices = self.construct_vertices() # These are the very initial points on the circumference
+		self.color = rand_color()
 		return
 
 	def construct_vertices(self) -> list: # Returns a list of tuples each of which describes an x,y point on the circumference of the circle.
@@ -55,13 +62,17 @@ class InkDrop:
 
 	def draw(self, t) -> None: # Render the shape. "t" is the turtle object we use to draw with.
 		# Go through all of the vertices in order.
+		t.color(self.color)
+		t.fillcolor(self.color)
 		t.penup()
 		t.goto(self.vertices[0][0]*SCALE_FACTOR, self.vertices[0][1]*SCALE_FACTOR) # Go to the first vertex
 		t.pendown()
+		t.begin_fill()
 		for vert in self.vertices[1:]: # Skip over first vertex here, because we already are there.
 			t.goto(vert[0]*SCALE_FACTOR, vert[1]*SCALE_FACTOR)
 		# Go back to the first vertex to close the loop.
 		t.goto(self.vertices[0][0]*SCALE_FACTOR, self.vertices[0][1]*SCALE_FACTOR)
+		t.end_fill()
 		t.penup() # Stop drawing...
 		return
 
