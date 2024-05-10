@@ -1,5 +1,5 @@
 
-CIRCLE_RESOLUTION = 10 # How many "circumference points" there are for each circle.
+CIRCLE_RESOLUTION = 20 # How many "circumference points" there are for each circle.
 SCALE_FACTOR = 100 # Scale the coordinates by this much when drawing..
 import math
 
@@ -37,9 +37,16 @@ class InkDrop:
 		t.penup() # Stop drawing...
 		return
 
-
-	def update(self) -> None: # Update physics maybe... Stub for now.
+	def marble(self, other) -> None: # This methods updates the vertices of this drop object using the other circle object.
+		for i in range(len(self.vertices)): # Loop over each vertex.
+			other_center = tuple((other.x0, other.y0))
+			other_r = other.r
+			#p_minus_c = tuple((self.x0 - other_center[0], self.y0 - other_center[1]))
+			p_minus_c = tuple((self.vertices[i][0] - other_center[0], self.vertices[i][1] - other_center[1])) # self.vertices
+			magnitude = math.sqrt(p_minus_c[0]**2 + p_minus_c[1]**2)
+			root_val = math.sqrt(1 + (other_r * other_r) / (magnitude * magnitude))
+			final_vec = tuple((other_center[0] + root_val * p_minus_c[0], other_center[1] + root_val * p_minus_c[1]))
+			self.vertices[i] = final_vec
 		return
-
 
 

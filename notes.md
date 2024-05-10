@@ -134,6 +134,139 @@ and it seems to work! Good!
 Let's create a loop, which just shows all of the circles over and over again... and then let's create an event handler which adds a new circle when the canvas gets clicked...
 
 
+After a bit of fiddling around, I now have this as my main function:
+
+```
+
+
+import turtle
+from inkdrop import *
+import time
+
+
+CIRC_RADIUS = 0.5 # Radius of each circle when added.
+
+new_circle = False
+new_x = None
+new_y = None
+
+
+def new_drop(x, y) -> None: # Will be called when the canvas gets clicked. Should create a new drop at x,y
+	global drops # We need to modify this global variable, therefore we need this here.
+	global new_x
+	global new_y
+	global new_circle
+	print("Clicked at "+str(x)+", "+str(y)+" .")
+
+	# When drawing, we scale by SCALE_FACTOR , therefore we need to divide by that here.
+
+	new_x = x/SCALE_FACTOR
+	new_y = y/SCALE_FACTOR
+	new_circle = True
+	return
+
+
+
+
+def main_loop() -> None:
+	global new_circle # We modify this.
+
+	t = turtle.Turtle() # Create a new turtle object.
+	# __init__(self, r, x0, y0)
+
+	#t.tracer(0,0)
+	turtle.tracer(0,0)
+	#drop = InkDrop(3, 0, 0) # Circle at (0,0) with radius 3.
+	# Render the drop.
+
+	#drop.draw(t)
+
+	turtle.onscreenclick(new_drop) # Setup click handlers
+	drops = [] # This is our main inkdrops list. We will use this to store all of our drop objects...
+	t.dot()
+	while True: # Main program loop
+
+		if not new_circle:
+			# Just show each circle. This is because we haven't added a new circle.
+			for drop in drops:
+				drop.draw(t)
+			#print("Drew all dots!")
+
+		else:
+			# Handle new circle.
+			print("new_circle == True")
+
+			new_circ = InkDrop(CIRC_RADIUS, new_x, new_y)
+			drops.append(new_circ)
+			new_circle = False
+		time.sleep(0.01) # No need to draw faster than that
+
+		turtle.update()
+
+		t.clear()
+
+	#time.sleep(5) # Wait for a bit for the user to see the result...
+
+	return
+
+
+if __name__=="__main__":
+	# Main program entry point.
+
+	main_loop()
+
+	exit(0)
+
+
+```
+
+and it seems to work fine.
+
+## Applying the formula for the new circles.
+
+Ok, so now instead of automatically just putting the circle into the list, we need to modify the new circle with the pre-existing circles, such that the new circle avoids the pre-existing circles.
+
+I actually got it the wrong way around, the new circle which we are adding is supposed to be an actual circle. It is the other circles which need to be modified to accommodate the new circle.
+
+Let's program a method for our inkdrop object which updates the vertices with the given formula.
+
+Here:
+
+```
+
+	def marble(self, other) -> None: # This methods updates the vertices of this drop object using the other circle object.
+		for i in range(len(self.vertices)): # Loop over each vertex.
+			other_center = tuple((other.x0, other.y0))
+			other_r = other.r
+			#p_minus_c = tuple((self.x0 - other_center[0], self.y0 - other_center[1]))
+			p_minus_c = tuple((self.vertices[i][0] - other_center[0], self.vertices[i][1] - other_center[1])) # self.vertices
+			magnitude = math.sqrt(p_minus_c[0]**2 + p_minus_c[1]**2)
+			root_val = math.sqrt(1 + (other_r * other_r) / (magnitude * magnitude))
+			final_vec = tuple((other_center[0] + root_val * p_minus_c[0], other_center[1] + root_val * p_minus_c[1]))
+			self.vertices[i] = final_vec
+		return
+
+
+```
+
+That seems to do the trick!
+
+## Implementing line strokes
+
+Ok, so that is quite good. I am thinking that we should also implement some other transformations while we are at it.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
