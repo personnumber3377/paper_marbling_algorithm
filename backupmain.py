@@ -14,54 +14,14 @@ new_y = None
 
 p0 = None
 p1 = None
-new_tine = False
 
-
-class WatchedKey:
-	def __init__(self, key):
-		self.key = key
-		self.down = False
-		turtle.onkeypress(self.press, key)
-		turtle.onkeyrelease(self.release, key)
-
-	def press(self):
-		self.down = True
-
-	def release(self):
-		self.down = False
-
-
-
-a_key = WatchedKey("a")
 
 def new_drop(x, y) -> None: # Will be called when the canvas gets clicked. Should create a new drop at x,y
 	global drops # We need to modify this global variable, therefore we need this here.
 	global new_x
 	global new_y
 	global new_circle
-	global a_key
-	global p0
-	global p1
-	global new_tine
-
 	print("Clicked at "+str(x)+", "+str(y)+" .")
-
-	# Check if we are pressing "a" at the same time, if yes, then we have a tine.
-	if a_key.down:
-		print("Tine press!!!!!!!!!!!!")
-		# Tine key press.
-		if not p0: # assign p0 and return
-			p0 = tuple((x/SCALE_FACTOR, y/SCALE_FACTOR))
-			return
-		elif not p1:
-			p1 = tuple((x/SCALE_FACTOR, y/SCALE_FACTOR))
-			# We should have p0
-			assert p0 != None
-			new_tine = True # Message the main loop about a new tine.
-
-		return
-
-
 
 	# When drawing, we scale by SCALE_FACTOR , therefore we need to divide by that here.
 
@@ -70,32 +30,22 @@ def new_drop(x, y) -> None: # Will be called when the canvas gets clicked. Shoul
 	new_circle = True
 	return 
 
-def process_tine(drops, p0, p1) -> None: # This applies the tine transformation to each of the drops.
+def new_tine() -> None: # This will be called when the user presses the up arrow.
+	global p0
+	global p1
+	global have_tine
+	canv = turtle.getcanvas()
+	x, y = canv.winfo_pointerx(), canv.winfo_pointery()
+	print("x == "+str(x))
+	print("y == "+str(y))
+	if not p0: # p0 is not assigned, therefore just assign it and return
+		p0 = tuple(())
 
-	#return # Just a stub for now.
-	A = p0 # Just set A to the first point.
-	p0_to_p1 = tuple((-p0[0]+p1[0], -p0[1]+p1[1]))
-	# Divide by magnitude to get unit vec.
-	mag = math.sqrt(p0_to_p1[0]**2 + p0_to_p1[1]**2) # Magnitude of the vector...
-	# Now divide...
-	unit_vec = tuple((p0_to_p1[0]/mag, p0_to_p1[1]/mag))
-	M = unit_vec
 
-	# Let's set alpha and lambda to just some constants.
-	a = 10.0 # alpha
-	l = 0.01 # lambda
-	# def tine(self, a, l, A, M) -> None:
-	# Now call tine() on each of the drop objects.
-	for drop in drops:
-		drop.tine(a, l, A, M)
-	return
+	return 
 
 def main_loop() -> None:
 	global new_circle # We modify this.
-	# These two are required for the tine lines
-	global p0
-	global p1
-	global new_tine
 
 	t = turtle.Turtle() # Create a new turtle object.
 	# __init__(self, r, x0, y0) 
@@ -107,10 +57,8 @@ def main_loop() -> None:
 
 	#drop.draw(t)
 
-
-
 	turtle.onscreenclick(new_drop) # Setup click handlers
-	#turtle.onkey(new_tine, "Up")
+	turtle.onkey(new_tine, "Up")
 	turtle.listen()
 	drops = [] # This is our main inkdrops list. We will use this to store all of our drop objects...
 	#t.dot()
@@ -133,21 +81,6 @@ def main_loop() -> None:
 
 			drops.append(new_circ)
 			new_circle = False
-
-		if new_tine: # We have a new tine.
-			#print("New tine line!")
-			#print("p0 == "+str(p0))
-			#print("p1 == "+str(p1))
-			#p0 = 
-
-			# Now process the tine line.
-
-			process_tine(drops, p0, p1)
-
-			new_tine = False
-			p0 = None
-			p1 = None
-
 		time.sleep(0.01) # No need to draw faster than that
 
 		turtle.update()

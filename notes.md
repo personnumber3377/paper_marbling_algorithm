@@ -255,10 +255,269 @@ That seems to do the trick!
 
 Ok, so that is quite good. I am thinking that we should also implement some other transformations while we are at it.
 
+The lines called "tine" lines are described in the paper in section 3.1.2 . It defines another transformation function, which draws these "tine" lines.
+
+To implement tinge lines, we first need a way to get user defined lines. I am going to use the "t" keyboard key to signify a tine line ("t" as in "tine") . The line starts from where the mouse position, and then ends at the place where you release the t key.
+
+Here is my current code (it actually works with the "a" key):
+
+```
+
+
+import turtle
+from inkdrop import *
+import time
+
+
+CIRC_RADIUS = 0.5 # Radius of each circle when added.
+
+new_circle = False
+new_x = None
+new_y = None
+
+# These will be used in the creation of the tine lines when the user presses up.
+
+p0 = None
+p1 = None
+new_tine = False
+
+
+class WatchedKey:
+	def __init__(self, key):
+		self.key = key
+		self.down = False
+		turtle.onkeypress(self.press, key)
+		turtle.onkeyrelease(self.release, key)
+
+	def press(self):
+		self.down = True
+
+	def release(self):
+		self.down = False
 
 
 
+a_key = WatchedKey("a")
 
+def new_drop(x, y) -> None: # Will be called when the canvas gets clicked. Should create a new drop at x,y
+	global drops # We need to modify this global variable, therefore we need this here.
+	global new_x
+	global new_y
+	global new_circle
+	global a_key
+	global p0
+	global p1
+	global new_tine
+
+	print("Clicked at "+str(x)+", "+str(y)+" .")
+
+	# Check if we are pressing "a" at the same time, if yes, then we have a tine.
+	if a_key.down:
+		print("Tine press!!!!!!!!!!!!")
+		# Tine key press.
+		if not p0: # assign p0 and return
+			p0 = tuple((x/SCALE_FACTOR, y/SCALE_FACTOR))
+			return
+		elif not p1:
+			p1 = tuple((x/SCALE_FACTOR, y/SCALE_FACTOR))
+			# We should have p0
+			assert p0 != None
+			new_tine = True # Message the main loop about a new tine.
+
+		return
+
+
+
+	# When drawing, we scale by SCALE_FACTOR , therefore we need to divide by that here.
+
+	new_x = x/SCALE_FACTOR
+	new_y = y/SCALE_FACTOR
+	new_circle = True
+	return
+
+def process_tine(drops, p0, p1) -> None: # This applies the tine transformation to each of the drops.
+
+	return # Just a stub for now.
+
+
+def main_loop() -> None:
+	global new_circle # We modify this.
+	# These two are required for the tine lines
+	global p0
+	global p1
+	global new_tine
+
+	t = turtle.Turtle() # Create a new turtle object.
+	# __init__(self, r, x0, y0)
+
+	#t.tracer(0,0)
+	turtle.tracer(0,0)
+	#drop = InkDrop(3, 0, 0) # Circle at (0,0) with radius 3.
+	# Render the drop.
+
+	#drop.draw(t)
+
+
+
+	turtle.onscreenclick(new_drop) # Setup click handlers
+	#turtle.onkey(new_tine, "Up")
+	turtle.listen()
+	drops = [] # This is our main inkdrops list. We will use this to store all of our drop objects...
+	#t.dot()
+	while True: # Main program loop
+
+		if not new_circle:
+			# Just show each circle. This is because we haven't added a new circle.
+			for drop in drops:
+				drop.draw(t)
+			#print("Drew all dots!")
+
+		else:
+			# Handle new circle.
+			#print("new_circle == True")
+
+			new_circ = InkDrop(CIRC_RADIUS, new_x, new_y)
+			# Marble every other drop, before adding the new drop to the list.
+			for drop in drops:
+				drop.marble(new_circ)
+
+			drops.append(new_circ)
+			new_circle = False
+
+		if new_tine: # We have a new tine.
+			#print("New tine line!")
+			#print("p0 == "+str(p0))
+			#print("p1 == "+str(p1))
+			#p0 =
+
+			# Now process the tine line.
+
+			process_tine(drops, p0, p1)
+
+			new_tine = False
+			p0 = None
+			p1 = None
+
+		time.sleep(0.01) # No need to draw faster than that
+
+		turtle.update()
+
+		t.clear()
+
+	#time.sleep(5) # Wait for a bit for the user to see the result...
+
+	return
+
+
+if __name__=="__main__":
+	# Main program entry point.
+
+	main_loop()
+
+	exit(0)
+
+
+```
+
+Now let's implement the process_tine function!
+
+## Implementing the tine algorithm (finally)
+
+Ok, so what do we need for the formula?
+
+I think we need these:
+
+```
+
+	def tine(self, a, l, A, M) -> None: # This method applies the tine line transformation to this ink drop
+		# "a" and "l" are both user defined parameters.
+
+		# These are calculated from the mouse clicks:
+		# A is the point on the line.
+		# M is the unit vector in the direction of the line.
+
+		return # Just a stub for now.
+
+
+```
+
+Ok, so let's craft these arguments.
+
+Maybe something like this????
+
+```
+
+def process_tine(drops, p0, p1) -> None: # This applies the tine transformation to each of the drops.
+
+	#return # Just a stub for now.
+	A = p0 # Just set A to the first point.
+	p0_to_p1 = tuple((-p0[0]+p1[0], -p0[1]+p1[1]))
+	# Divide by magnitude to get unit vec.
+	mag = math.sqrt(p0_to_p1[0]**2 + p0_to_p1[1]**2) # Magnitude of the vector...
+	# Now divide...
+	unit_vec = tuple((p0_to_p1[0]/mag, p0_to_p1[1]/mag))
+	M = unit_vec
+
+	# Let's set alpha and lambda to just some constants.
+	a = 0.1 # alpha
+	l = 0.1 # lambda
+	# def tine(self, a, l, A, M) -> None:
+	# Now call tine() on each of the drop objects.
+	for drop in drops:
+		drop.tine(a, l, A, M)
+	return
+
+```
+
+now let's code the method for the ink drop object:
+
+```
+
+
+	def tine(self, a, l, A, M) -> None: # This method applies the tine line transformation to this ink drop
+		# "a" and "l" are both user defined parameters.
+
+		# These are calculated from the mouse clicks:
+		# A is the point on the line.
+		# M is the unit vector in the direction of the line.
+
+		#return # Just a stub for now.
+
+		# "N is a unit vector perpendicular to L"
+
+		# Let's calculate value of N
+
+		# perpendicular
+
+		N = perpendicular(M) # M is a unit vector in the direction of the line, so therefore we can just call "perpendicular" on it.
+
+		for i in range(len(self.vertices)): # Loop through all points.
+			P = self.vertices[i]
+			d = calc_d(P, A, N)
+			scalar_frac = (a * l) / (d + l)
+			thing = tuple((M[0]*scalar_frac, M[1]*scalar_frac))
+			self.vertices[i] = tuple((self.vertices[i][0] + thing[0], self.vertices[i][1] + thing[1]))
+
+		return
+
+
+
+def perpendicular(a):
+	#b = np.empty_like(a)
+	b = [0.0, 0.0]
+	b[0] = -a[1]
+	b[1] = a[0]
+	return tuple(b)
+
+
+
+```
+
+and it seems to work okay. One issue with this, is that it also moves the entire inkdrop in addition to drawing a streak through it, but maybe that is just a feature and not a bug maybe???? idk..
+
+## Final thoughts
+
+Okay, so now after completing this, I actually think that this was quite fun to try to implement and do. You can check out my github repo here: https://github.com/personnumber3377/paper_marbling_algorithm
 
 
 

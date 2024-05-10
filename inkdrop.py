@@ -1,7 +1,35 @@
 
-CIRCLE_RESOLUTION = 20 # How many "circumference points" there are for each circle.
+CIRCLE_RESOLUTION = 200 # How many "circumference points" there are for each circle.
 SCALE_FACTOR = 100 # Scale the coordinates by this much when drawing..
 import math
+
+
+'''
+
+def perpendicular( a ) :
+    b = np.empty_like(a)
+    b[0] = -a[1]
+    b[1] = a[0]
+    return b
+
+'''
+
+# Just a helper function...
+
+def perpendicular(a):
+	#b = np.empty_like(a)
+	b = [0.0, 0.0]
+	b[0] = -a[1]
+	b[1] = a[0]
+	return tuple(b)
+
+# Another helper to calculate "d"
+
+def calc_d(P, A, N) -> float:
+	P_minus_A = tuple((P[0]-A[0], P[1]-A[1]))
+	dot_p = P_minus_A[0] * N[0] + P_minus_A[1] * N[1]
+	d = abs(dot_p)
+	return d
 
 class InkDrop:
 
@@ -47,6 +75,32 @@ class InkDrop:
 			root_val = math.sqrt(1 + (other_r * other_r) / (magnitude * magnitude))
 			final_vec = tuple((other_center[0] + root_val * p_minus_c[0], other_center[1] + root_val * p_minus_c[1]))
 			self.vertices[i] = final_vec
+		return
+
+	def tine(self, a, l, A, M) -> None: # This method applies the tine line transformation to this ink drop
+		# "a" and "l" are both user defined parameters.
+		
+		# These are calculated from the mouse clicks:
+		# A is the point on the line.
+		# M is the unit vector in the direction of the line.
+
+		#return # Just a stub for now.
+
+		# "N is a unit vector perpendicular to L"
+
+		# Let's calculate value of N
+
+		# perpendicular
+
+		N = perpendicular(M) # M is a unit vector in the direction of the line, so therefore we can just call "perpendicular" on it.
+
+		for i in range(len(self.vertices)): # Loop through all points.
+			P = self.vertices[i]
+			d = calc_d(P, A, N)
+			scalar_frac = (a * l) / (d + l)
+			thing = tuple((M[0]*scalar_frac, M[1]*scalar_frac))
+			self.vertices[i] = tuple((self.vertices[i][0] + thing[0], self.vertices[i][1] + thing[1]))
+
 		return
 
 
