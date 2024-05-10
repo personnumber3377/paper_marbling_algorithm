@@ -83,13 +83,15 @@ def process_tine(drops, p0, p1) -> None: # This applies the tine transformation 
 	M = unit_vec
 
 	# Let's set alpha and lambda to just some constants.
-	a = 10.0 # alpha
-	l = 0.01 # lambda
+	a = 0.3 # alpha
+	l = 0.1 # lambda
 	# def tine(self, a, l, A, M) -> None:
 	# Now call tine() on each of the drop objects.
 	for drop in drops:
 		drop.tine(a, l, A, M)
 	return
+
+AUTOMODE = True # This automatically adds random stuff.
 
 def main_loop() -> None:
 	global new_circle # We modify this.
@@ -115,6 +117,7 @@ def main_loop() -> None:
 	turtle.listen()
 	drops = [] # This is our main inkdrops list. We will use this to store all of our drop objects...
 	#t.dot()
+	count = 0
 	while True: # Main program loop
 
 		if not new_circle:
@@ -126,7 +129,8 @@ def main_loop() -> None:
 		else:
 			# Handle new circle.
 			#print("new_circle == True")
-			MAX_RANGE = 0.5
+			#MAX_RANGE = 0.5
+			MAX_RANGE = 2
 			radius = random.random() * MAX_RANGE
 			new_circ = InkDrop(radius, new_x, new_y)
 			# Marble every other drop, before adding the new drop to the list.
@@ -150,11 +154,25 @@ def main_loop() -> None:
 			p0 = None
 			p1 = None
 
-		time.sleep(0.01) # No need to draw faster than that
-
+		#time.sleep(0.3) # No need to draw faster than that
+		time.sleep(0.01)
 		turtle.update()
 
 		t.clear()
+
+		if AUTOMODE:
+			#if count > 1000: # Do not draw over a thousand times in auto mode
+			#	continue
+			# Generate random inkdrop...
+			if random.random() < 0.9: # 10 % of a random inkdrop...
+				new_circle = True
+				new_x = (random.choice([1, -1])) * (random.random() * 6)
+				new_y = (random.choice([1, -1])) * (random.random() * 6)
+				count += 1
+				print("Count == "+str(count))
+
+			# Random thing.
+
 
 	#time.sleep(5) # Wait for a bit for the user to see the result...
 

@@ -35,7 +35,16 @@ def calc_d(P, A, N) -> float:
 HEX = "0123456789ABCDEF"
 
 def rand_color() -> str: # Returns a random color "#aabbcc"
-	return "#"+str("".join([random.choice(HEX) for _ in range(6)])) # Generate random hex color string
+	#return "#"+str("".join([random.choice(HEX) for _ in range(6)])) # Generate random hex color string
+	# r, g and b are all the same.
+	hex_thing = hex(random.randrange(0,256))[2:]
+
+	if len(hex_thing) == 1: # 0x0 through 0xf:
+		hex_thing = "0" + hex_thing
+
+	assert len(hex_thing) == 2
+
+	return "#"+(hex_thing*3)
 
 class InkDrop:
 
